@@ -1,25 +1,15 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import { userContext } from './hooks/useContext';
+import { Canva } from './components/Canva';
 
-function App() {
+const App =()=> {
+  //dibujar, escribir, borrar, figura
+  let [funcionalidad, setFun] = useState([false, false, false, false]);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <userContext.Provider value={{funcionalidad, setFun}}>
+      <Canva/>
+    </userContext.Provider>
+  )
 }
 
 export default App;
