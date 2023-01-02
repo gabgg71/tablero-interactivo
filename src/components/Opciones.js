@@ -3,88 +3,96 @@ import { createCanvas, loadImage } from 'canvas';
 
 
 export const Opciones = () => {
-  //const canvas = document.getElementById('myCanvas');
-  //const ctx = canvas.getContext('2d');
+ /* const canvas = document.getElementById('myCanvas');
+  const ctx = canvasRef.current.getContext('2d');*/
+  const canvasRef = useRef(null);
+  const textoRef = useRef(null);
+  const ctxRef = useRef(null);
 
-  //dibujar, escribir, borrar, figura
-  const canvas = createCanvas(window.innerWidth, window.innerHeight)
-  const ctx = canvas.getContext('2d')
   let [desplegado, setDesplegado] = useState();
-  //const canvasRef = useRef(null);
   let figuraSel = undefined;
   let [currentColor, setCurrent] = useState("black")
-  let color_fondo = "white"
+  let [color_fondo, setFondo] = useState("white")
+  //let color_fondo = "white"
+  let color_opcional = undefined
   let relleno = color_fondo
-  //let desplegado = undefined
-  let limite = undefined;
+  let limite = window.innerHeight * 0.96;
   let borde = currentColor
-  /* let canvas = undefined;
-   let ctx = undefined;*/
   //texto
   let [fuente, setFuente] = useState("Arial");
-  let [tamano, setTamano] = useState(10);
-  /* let [canva, setCanva] = useState(10);
-   let [ctx, setCanva] = useState(10);*/
+  let tamano =10
 
   let sizeBorrador = 5;
   let ix, iy, fx, fy, maxfx = 0, maxfy = 0, minfx = 1000000, minfy = 1000000;
-  let texto = undefined;
 
   let isDrawing = false;
   let borrador = false;
   let figuras = false;
   let escribir = false;
 
-  //useEffect(() => {
-  //canvas = canvasRef.current;
-  //let ctx = canvas.getContext("2d");
-  /*canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;*/
-  ctx.lineWidth = 1;
-  limite = canvas.height * 0.96
-  texto = document.querySelector(".texto");
-  canvas.addEventListener('mousedown', (e) => {
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    // For supporting computers with higher screen densities, we double the screen density
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    // Setting the context to enable us draw
+    const ctx = canvasRef.current.getContext('2d');
+    ctxRef.current = ctx;
+    ctxRef.current.lineWidth = 1;
+  }, []);
+
+
+  const bajar =(e)=>{
+    console.log('MOUSE')
     if (!borrador) {
       if (escribir) {
-        texto.style.left = e.clientX + "px";
-        texto.style.top = e.clientY + "px";
-        texto.value = ""
-        texto.style.display = "block";
+        textoRef.current.style.left = e.clientX + "px";
+        textoRef.current.style.top = e.clientY + "px";
+        textoRef.current.value = ""
+        textoRef.current.style.display = "block";
       } else {
         if (figuraSel) {
           figuras = true;
           //funcionalidad[3] = true;
           ix = e.clientX;
           iy = e.clientY;
+          ctxRef.current.strokeStyle = borde;
+          ctxRef.current.fillStyle = relleno;
+          console.log(`establezo borde ${borde} y relleno ${relleno}`)
+        }else{
+          ctxRef.current.strokeStyle = currentColor;
         }
         isDrawing = true;
-        ctx.beginPath();
-        ctx.strokeStyle = currentColor;
-        ctx.moveTo(e.clientX, e.clientY);
+        ctxRef.current.beginPath();
+        ctxRef.current.moveTo(e.clientX, e.clientY);
       }
     }
-  }
-  );
 
-  canvas.addEventListener('mousemove', (e) => {
+  }
+
+  const mover=(e)=>{
     if (borrador) {
-      ctx.fillStyle = color_fondo;
-      ctx.clearRect(e.clientX, e.clientY, sizeBorrador, sizeBorrador);
-      ctx.fillRect(e.clientX, e.clientY, sizeBorrador, sizeBorrador);
+      ctxRef.current.fillStyle = color_fondo;
+      console.log("color fondo: " + color_fondo)
+      ctxRef.current.clearRect(e.clientX, e.clientY, sizeBorrador, sizeBorrador);
+      ctxRef.current.fillRect(e.clientX, e.clientY, sizeBorrador, sizeBorrador);
     } else {
       if (isDrawing && figuras) {
+        
         fx = e.clientX;
         fy = e.clientY;
         if (figuraSel === "rectangulo") {
           if (fx < maxfx && fy >= maxfy) {
-            (fx < ix) ? (ctx.clearRect(minfx - 1, iy - 1, ix - minfx, fy - iy)) : (ctx.clearRect(ix - 1, iy - 1, maxfx - ix, fy - iy));
+            (fx < ix) ? (ctxRef.current.clearRect(minfx - 1, iy - 1, ix - minfx, fy - iy)) : (ctxRef.current.clearRect(ix - 1, iy - 1, maxfx - ix, fy - iy));
           } else if (fx >= maxfx && fy < maxfy) {
-            (fx < ix) ? (ctx.clearRect(fx - ix, minfy - iy, ix, iy)) : (ctx.clearRect(ix - 1, minfy - 1, fx - ix, iy))
+            (fx < ix) ? (ctxRef.current.clearRect(fx - ix, minfy - iy, ix, iy)) : (ctxRef.current.clearRect(ix - 1, minfy - 1, fx - ix, iy))
           } else if (fx < maxfx && fy < maxfy) {
             enMinimizacion();
+          }else if(fx > maxfx && fy > maxfy){
+            ctxRef.current.clearRect(ix, iy, fx - ix, fy - iy);
           }
           validaMin();
-          dibujaCuadrado();
+          dibujarRectangulo();
         } else if (figuraSel === "circulo") {
           if (fx > maxfx) {
             maxfx = fx
@@ -93,7 +101,7 @@ export const Opciones = () => {
             maxfy = fy
           }
           const radio = Math.sqrt((maxfx - ix) ** 2 + (maxfy - iy) ** 2)
-          ctx.clearRect(ix - radio - 1, iy - radio - 1, 2 * radio + 2, 2 * radio + 2);
+          ctxRef.current.clearRect(ix - radio - 1, iy - radio - 1, 2 * radio + 2, 2 * radio + 2);
           dibujaCirculo();
         } else if (figuraSel === "triangulo") {
           validaMin();
@@ -102,31 +110,18 @@ export const Opciones = () => {
         }
       }
       if (isDrawing && !figuras) {
-        ctx.lineTo(e.clientX, e.clientY);
-        ctx.stroke();
+        ctxRef.current.lineTo(e.clientX, e.clientY);
+        ctxRef.current.stroke();
       }
     }
-  });
+  }
 
-  /*texto.addEventListener("keydown", (event) => {
-    if (event.keyCode === 13) {
-      let textoF = texto.value;
-      let x = texto.style.left.slice(0, -2)
-      let y = texto.style.top.slice(0, -2)
-      ctx.fillStyle = currentColor;
-      ctx.font = tamano + "px " + fuente;
-      ctx.fillText(textoF, x, y);
-      texto.style.display = "none";
-    }
-  });*/
-
-
-  canvas.addEventListener('mouseup', (e) => {
+  const subir=(e)=>{
     if (isDrawing && figuras) {
       fx = e.clientX;
       fy = e.clientY;
       if (figuraSel === "cuadrado") {
-        dibujaCuadrado();
+        dibujarRectangulo();
       } else if (figuraSel === "circulo") {
         dibujaCirculo();
       } else if (figuraSel === "rectangulo") {
@@ -143,9 +138,21 @@ export const Opciones = () => {
     maxfy = 0
     minfx = 1000000
     minfy = 1000000
-  });
+  }
 
-  //}, []);
+  const escribio = (e)=>{
+    if (e.keyCode === 13) {
+      let textoF = textoRef.current.value;
+      let x = textoRef.current.style.left.slice(0, -2)
+      let y = textoRef.current.style.top.slice(0, -2)
+      ctxRef.current.fillStyle = currentColor;
+      ctxRef.current.font = tamano + "px " + fuente;
+      ctxRef.current.fillText(textoF, x, y);
+      textoRef.current.style.display = "none";
+    }
+
+  }
+
   const cambios = (tipo, valor) => {
     //color lapiz
     switch (tipo) {
@@ -161,7 +168,7 @@ export const Opciones = () => {
         borde = valor;
         break;
       case "grosor-lapiz":
-        ctx.lineWidth = valor;
+        ctxRef.current.lineWidth = valor;
         break;
       case "grosor-funcionalidad[2]":
         sizeBorrador = valor;
@@ -181,14 +188,30 @@ export const Opciones = () => {
 
   }
 
-  const cambio = (e) => {
+  const cambio =(e)=>{
     currentColor = e.target.value;
-    setCurrent(e.target.value)
-    console.log("hice cambio")
+  }
+  
+  const cambioFuente=(e)=>{
+    fuente = e.target.value;
+  }
+
+  const cambioTam=(e)=>{
+    tamano = e.target.value;
+  }
+
+  const rellenar=(e)=>{
+    relleno = e.target.value;
+
+  }
+  
+  const bordear=(e)=>{
+    borde = e.target.value;
+    console.log("cambie borde")
   }
 
   const presiona = (e) => {
-    ctx.lineWidth = e.target.value;
+    ctxRef.current.lineWidth = e.target.value;
   }
 
   const cambiarTamBorrador = (e) => {
@@ -200,6 +223,7 @@ export const Opciones = () => {
     escribir = false;
     figuras = true;
     figuraSel = tipoFigura;
+    
   }
 
   const dibujar = () => {
@@ -220,9 +244,14 @@ export const Opciones = () => {
 
 
   const fondo = (e) => {
-    color_fondo = e.target.value;
-    ctx.fillStyle = e.target.value;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    color_opcional = e.target.value;
+  }
+
+  const aplicarFondo = () => {
+    setFondo(color_opcional)
+    //color_fondo = color_opcional;
+    ctxRef.current.fillStyle = color_opcional;
+    ctxRef.current.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
   }
   
 
@@ -243,35 +272,37 @@ export const Opciones = () => {
 
 
   const limpiar = () => {
-    ctx.fillStyle = color_fondo;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctxRef.current.fillStyle = color_fondo;
+    ctxRef.current.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    ctxRef.current.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
   }
 
   const restaurar = () => {
     color_fondo = "white";
-    ctx.fillStyle = color_fondo;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctxRef.current.fillStyle = color_fondo;
+    ctxRef.current.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    ctxRef.current.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     currentColor = "black"
-    ctx.lineWidth = 1;
+    ctxRef.current.lineWidth = 1;
   }
 
   const enMinimizacion = () => {
     //inferior derecha
     if (ix < fx && iy < fy) {
-      ctx.clearRect(ix - 1, iy - 1, maxfx, maxfy);
+      ctxRef.current.clearRect(ix - 1, iy - 1, maxfx-ix+2, maxfy-iy+2);
     } else if (ix < fx && iy > fy) {
       //superior derecha
-      ctx.clearRect(ix - 1, minfy - 1, maxfx - ix + 2, iy - minfy + 2);
+      ctxRef.current.clearRect(ix - 1, minfy - 1, maxfx - ix + 2, iy - minfy + 2);
     } else if (ix > fx && iy < fy) {
       //inferior izquierda
-      ctx.clearRect(minfx - 1, iy - 1, ix - minfx + 2, maxfy - iy + 2);
+      ctxRef.current.clearRect(minfx - 1, iy - 1, ix - minfx + 2, maxfy - iy + 2);
     } else {
       //superior izquierda
-      ctx.clearRect(minfx - 1, minfy - 1, ix, iy);
+      ctxRef.current.clearRect(minfx - 1, minfy - 1, ix, iy);
     }
   }
+
+  
 
   const validaMin = () => {
     if (fx < minfx) {
@@ -343,41 +374,45 @@ export const Opciones = () => {
   }
 
 
-  const dibujaCuadrado = () => {
-    ctx.strokeRect(ix, iy, fx - ix, fy - iy);
-  }
 
   const dibujaCirculo = () => {
-    ctx.beginPath();
+    ctxRef.current.beginPath();
     const radio = Math.sqrt((fx - ix) ** 2 + (fy - iy) ** 2);
-    ctx.arc(ix, iy, radio, 0, 2 * Math.PI);
-    ctx.stroke();
+    ctxRef.current.arc(ix, iy, radio, 0, 2 * Math.PI);
+    ctxRef.current.fill();
+    ctxRef.current.stroke();
   }
 
   const dibujarRectangulo = () => {
-    ctx.beginPath();
-    ctx.rect(ix, iy, fx - ix, fy - iy);
-    ctx.stroke();
+    ctxRef.current.beginPath();
+    ctxRef.current.rect(ix, iy, fx - ix, fy - iy);
+    ctxRef.current.fillRect(ix, iy, fx - ix, fy - iy);
+    ctxRef.current.stroke();
   }
   const dibujarTriangulo = () => {
-    ctx.beginPath();
-    ctx.moveTo(ix, iy);
-    ctx.lineTo(fx, iy);
-    ctx.lineTo((ix + fx) / 2, fy);
-    ctx.closePath();
-    ctx.stroke();
+    ctxRef.current.beginPath();
+    ctxRef.current.moveTo(ix, iy);
+    ctxRef.current.lineTo(fx, iy);
+    ctxRef.current.lineTo((ix + fx) / 2, fy);
+    ctxRef.current.fill();
+    ctxRef.current.closePath();
+    ctxRef.current.stroke();
   }
 
   const dibujarLinea = () => {
-    ctx.beginPath();
-    ctx.moveTo(ix, iy);
-    ctx.lineTo(fx, fy);
-    ctx.closePath();
-    ctx.stroke();
+    ctxRef.current.beginPath();
+    ctxRef.current.moveTo(ix, iy);
+    ctxRef.current.lineTo(fx, fy);
+    ctxRef.current.closePath();
+    ctxRef.current.stroke();
   }
 
   const seleccionarArea = () => {
 
+  }
+
+  const bajo =()=>{
+    console.log("bajo")
   }
 
 
@@ -386,96 +421,127 @@ export const Opciones = () => {
     <>
       <div className="opciones">
         <div className="opcion op1">
-          <div className="conf">
-            <label htmlFor="tam" className="color">Color</label>
-            <input type="color" onChange={cambio}></input>
-            <label htmlFor="tam">Ancho de linea</label>
-            <input type="range" id="tam" min="1" max="50" step="5" value="1" onChange={presiona}></input>
-            <button value=".op1" onClick={dibujar}><span class="material-symbols-outlined">
-              draw
-            </span></button>
-          </div>
+            <div className="conf">
+                <label htmlFor="tam" className="color">Color</label>
+                <input type="color" onChange={cambio}></input>
+                <label htmlFor="tam">Ancho de linea</label>
+                <input type="range" id="tam" min="1" max="50" step="5" onChange={presiona}></input>
+                <button value=".op1" onClick={dibujar}><span className="material-symbols-outlined">
+                    draw
+                    </span></button>
+            </div>
         </div>
         <div className="opcion op2">
-          <div className="conf">
+            <div className="conf">
             <label htmlFor="tam">Fuente</label>
-            <select id="tam" onChange={() => { setFuente(this.value) }}>
-              <option value="Arial">Arial</option>
-              <option value="Times New Roman">Times New Roman</option>
-              <option value="Courier New">Courier New</option>
-              <option value="Verdana">Verdana</option>
-              <option value="Georgia">Georgia</option>
-              <option value="Trebuchet MS">Trebuchet MS</option>
-              <option value="Palatino">Palatino</option>
-              <option value="Comic Sans MS">Comic Sans MS</option>
-              <option value="Impact">Impact</option>
+            <select id="tam" onChange={cambioFuente}>
+                <option value="Arial">Arial</option>
+                <option value="Times New Roman">Times New Roman</option>
+                <option value="Courier New">Courier New</option>
+                <option value="Verdana">Verdana</option>
+                <option value="Georgia">Georgia</option>
+                <option value="Trebuchet MS">Trebuchet MS</option>
+                <option value="Palatino">Palatino</option>
+                <option value="Comic Sans MS">Comic Sans MS</option>
+                <option value="Impact">Impact</option>
             </select>
             <label htmlFor="tam">Tamano fuente</label>
-            <input type="range" id="tam" min="10" max="80" step="5" value="1" onChange={() => { setTamano(this.value) }}></input>
-            <button className="dibujar" onClick={escribe}><span class="material-symbols-outlined">
-              edit_square
-            </span></button>
-          </div>
+            <input type="range" id="tam" min="10" max="80" step="5" onChange={cambioTam}></input>
+            <button className="dibujar" onClick={escribe}><span className="material-symbols-outlined">
+                edit_square
+                </span></button>
+        </div>
         </div>
         <div className="opcion op3">
-          <div className="conf">
+            <div className="conf">
             <label htmlFor="tam">Color fondo</label>
             <input type="color" onChange={fondo}></input>
             <button onClick={restaurar}>Restaurar</button>
-          </div>
+            <button onClick={aplicarFondo}>Aplicar</button>
+        </div>
         </div>
         <div className="opcion op4">
-          <div className="conf">
-            <label htmlFor="tam">Area de borrado</label>
-            <input type="range" min="5" max="50" step="5" value="5" onChange={cambiarTamBorrador}></input>
+            <div className="conf">
+                <label htmlFor="tam">Area de borrado</label>
+                <input type="range" min="5" max="50" step="5" onChange={cambiarTamBorrador}></input>
             <button onClick={seleccionarArea}>Seleccionar area</button>
             <button onClick={borrar}>Borrar</button>
             <button onClick={limpiar}>Limpiar</button>
-          </div>
+        </div>
         </div>
         <div className="opcion op5">
-          <div className="conf">
-            <label htmlFor="tam">Color de relleno</label>
-            <input type="color" onChange={() => {
-              //relleno(this.value)
-            }}></input>
-            <label htmlFor="tam">Color borde</label>
-            <input type="color" onChange={() => {
-              //borde(this.value)
-            }}></input>
-          </div>
-          <div className="flexi">
-            <button onClick={dibujar}>
-              <span class="material-symbols-outlined">
-                waves
-              </span>
-            </button>
-            <button value="linea" onClick={() => { crearFigura(this.value) }}><span class="material-symbols-outlined">
-              check_indeterminate_small
-            </span></button>
-            <button value="circulo" onClick={() => { crearFigura(this.value) }}><span class="material-symbols-outlined">
-              circle
-            </span></button>
-            <button value="rectangulo" onClick={() => { crearFigura(this.value) }}><span class="material-symbols-outlined">
-              rectangle
-            </span></button>
-            <button value="triangulo" onClick={() => { crearFigura(this.value) }}><span class="material-symbols-outlined">
-              change_history
-            </span></button>
+            <div className="conf">
+                <label htmlFor="rell">Relleno</label>
+                <input type="color" onChange={rellenar}></input>
+                <label htmlFor="bor">Borde</label>
+                <input type="color" onChange={bordear}></input>
+            </div>
+            <div className="flexi">
+                <button onClick={dibujar}>
+                    <span className="material-symbols-outlined">
+                        waves
+                        </span>
+                </button>
+                <button value="linea" onClick={()=>{crearFigura("linea")}}><span className="material-symbols-outlined">
+                    check_indeterminate_small
+                    </span></button>
+                <button value="circulo" onClick={()=>{crearFigura("circulo")}}><span className="material-symbols-outlined">
+                    circle
+                    </span></button>
+                <button value="rectangulo" onClick={()=>{crearFigura("rectangulo")}}><span className="material-symbols-outlined">
+                    rectangle
+                    </span></button>
+                <button value="triangulo" onClick={()=>{crearFigura("triangulo")}}><span className="material-symbols-outlined">
+                    change_history
+                    </span></button>
 
+                    
+                    
+                </div>
 
+                
 
-          </div>
         </div>
         <div className="opcion op6">
-        <input type="file" onChange={subirImg} accept="image/*" className="upload"></input>
+            <input type="file" onChange={subirImg} accept="image/*" className="upload"></input>
         </div>
+    </div>
+      <div className="iconos">
+        <button value=".op1" onClick={()=>{mostrarOpcion(".op1")}}><span className="material-symbols-outlined">
+        edit
+        </span></button>
+        <button value=".op2" onClick={()=>{mostrarOpcion(".op2")}}><span className="material-symbols-outlined">
+        title
+        </span></button>
+        <button value=".op3" onClick={()=>{mostrarOpcion(".op3")}}><span className="material-symbols-outlined">
+            format_color_fill
+            </span></button>
+        <button value=".op4" onClick={()=>{mostrarOpcion(".op4")}}><span className="material-symbols-outlined">
+            delete_forever
+            </span></button>
+        <button value=".op5" onClick={()=>{mostrarOpcion(".op5")}}><span className="material-symbols-outlined">
+        interests
+        </span></button>
+        <button value=".op6" onClick={()=>{mostrarOpcion(".op6")}}><span className="material-symbols-outlined">
+            add_photo_alternate
+            </span></button>
+            <button><span className="material-symbols-outlined">
+                settings
+            </span></button>
+            <button>
+                <span className="material-symbols-outlined">
+                    help
+                </span>
+            </button>
+            <button className="desplegar" onClick={sinOpcion}>
+                <span className="material-symbols-outlined">
+                    arrow_back_ios
+                    </span>
+            </button>
 
-
-
-
-      </div>
-      <textarea class="texto" placeholder="Escribe aqui"></textarea>
+    </div>
+      <canvas id="myCanvas" ref={canvasRef} onMouseDown={bajar} onMouseMove={mover} onMouseUp={subir}></canvas>
+      <textarea class="texto" placeholder="Escribe aqui" onKeyDown={escribio} ref={textoRef}></textarea>
         
         <div class="basurita desplegar">
             <span class="material-symbols-outlined">
