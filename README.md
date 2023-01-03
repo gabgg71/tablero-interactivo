@@ -27,7 +27,7 @@
 
 ## Overview
 
-![screenshot](https://github.com/gabgg71/my-unsplash-master/blob/main/public/sc2.png?raw=true)
+![screenshot](https://github.com/gabgg71/tablero-interactivo/blob/master/public/sc2.png?raw=true)
 
 ### Built With
 
@@ -37,31 +37,32 @@
 ## Features
 
 This interactive board has features such as:
-Free drawing options
-- Set color
-- Line thickness
-Writing options
-- Font type
-- Font size
-Background options
-- Apply color
-- Reset to default values
-Eraser options
-- Eraser thickness
-- Wipe whiteboard (erases everything on the whiteboard, retains the selected background color) 
-- Partial erase
-Shape tracing options
-- Shape tracing
-- Fill shape 
-- Shape border
-Multimedia options
-- Image resizing
-- Image scrolling 
-Configuration options
-- Shape configuration
-- Style configuration
-Questions
-Information about how to use certain features
+* Free drawing options
+    * Set color
+    * Line thickness
+* Writing options
+    * Font type
+    * Font size
+* Background options
+    * Apply color
+    * Reset to default values
+* Eraser options
+    * Eraser thickness
+    * Wipe whiteboard (erases everything on the whiteboard, retains the selected background color) 
+    * Partial erase with cursor
+    * Erase selected area
+* Shape tracing options
+    * Shape tracing
+    * Fill shape 
+    * Shape border
+* Multimedia options
+    * Image resizing
+    * Image scrolling 
+* Configuration options
+    * Shape configuration
+    * Style configuration
+* Solved questions about how to use some features
+
 
 ## How To Use
 
