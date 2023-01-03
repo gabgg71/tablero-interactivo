@@ -14,7 +14,7 @@ html, body{
   display: flex;
   flex-direction: column;
   width: 10vw;
-  height: 100%;
+  
   left: 3.5%;
   border-right: none;
 }
@@ -35,7 +35,7 @@ html, body{
 
 
 .iconos button{
-  background-color: rgb(105,77,255);
+  background-color: #ff7702;
   margin: 0%;
   width: 100%;
   height: 10%;
@@ -45,7 +45,7 @@ html, body{
   background-color: rgb(219, 230, 226);
   position: absolute;
   width: 15%;
-  border: rgb(105,77,255) 1px dashed;
+  border: #ff7702 1px dashed;
   overflow-wrap: break-word;
   word-wrap: break-word;
   hyphens: auto;
@@ -54,7 +54,7 @@ html, body{
 }
 
 .opciones .opcion{
-  height: 20vh;
+  height: 25vh;
   background-color: rgb(207, 206, 206);
   outline:  0.2vh solid black;
   padding: 10%;
@@ -109,7 +109,7 @@ input[type="color" i]{
   left: 0%;
   width: 3.5%;
   height: 100%;
-  background-color: blue;
+  background-color: #ff7702;
   z-index: 100;
   
 }
@@ -146,14 +146,79 @@ input[type="color" i]{
   position: absolute;
   left: 30%;
   height: 40%;
-  background-color: aqua;
-  z-index: 10;
+  background-color: white;
+  z-index: 1000;
   display: none;
   top: 30%;
   border-radius: 10px;
   box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
+  padding: 2%;
+}
+
+.ventana-small{
+  width: 30%;
+  position: absolute;
+  left: 35%;
+  background-color: white;
+  z-index: 1001;
+  display: none;
+  top: 40%;
+  border-radius: 10px;
+  box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
+  padding: 2%;
 }
 
 .desplegar{
   display: none;
+}
+
+.conf-opc{
+  display: flex;
+  flex-direction:row;
+}
+
+.cerrar{
+  right: 4%;
+  position: absolute;
+  border: none;
+  background-color: #fff;
+  font-size: large;
+}
+
+.preguntas{
+  overflow-y: scroll;
+}
+
+.check{
+  margin-top: 3%;
+}
+
+.seleccion{
+  position: absolute;
+ 
+  left: 10%;
+  background-color: transparent;
+  top: 0%;
+  border: 10px dashed #ff7702;
+  display: none;
+}
+
+.opc{
+  display: flex;
+  flex-direction: column;
+  height: 90%;
+  width: 10%;
+  margin-left: 90%;
+  display: hidden;
+}
+
+.opc *{
+  height: 50%;
+}
+.done{
+  background-color: #ff7702;
+}
+
+.descartar{
+  background-color: red;
 }
