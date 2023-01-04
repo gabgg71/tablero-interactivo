@@ -135,10 +135,9 @@ input[type="color" i]{
 }
 
 .borrador{
-  height: 10px;
-  width: 10px;
-  background-color: thistle;
-
+  background-color: rgb(228, 166, 132);
+  position: absolute;
+  display: none;
 }
 
 .ventana{

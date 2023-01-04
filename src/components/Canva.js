@@ -21,6 +21,8 @@ export const Canva = () => {
   let ix, iy, fx, fy, maxfx = 0, maxfy = 0, minfx = 1000000, minfy = 1000000;
   let isDrawing = false;
   let borrador = false;
+  let [habilitaBorrado, setHabilita] = useState(false);
+  
   let figuras = false;
   let escribir = false;
   let resizing = false;
@@ -30,6 +32,8 @@ export const Canva = () => {
   let seleccionAct = false;
   let opor =false;
   let seleccionado = document.querySelector(".seleccion")
+  let borradorF = document.querySelector(".borrador")
+  let puntos = [];
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -39,6 +43,7 @@ export const Canva = () => {
     ctxRef.current = ctx;
     ctxRef.current.lineWidth = 1;
     seleccionado = document.querySelector(".seleccion")
+    borradorF = document.querySelector(".borrador")
     const redimensionar = () => {
       canvasRef.current.width = window.innerWidth;
       canvasRef.current.height = window.innerHeight;
@@ -50,7 +55,15 @@ export const Canva = () => {
 
 
   const bajar =(e)=>{
-    if(seleccionAct){
+    if(habilitaBorrado){
+      borrador = true;
+      borradorF.style.left = e.clientX + "px";
+      borradorF.style.top = e.clientY + "px";
+      borradorF.style.width = sizeBorrador + "px";
+      borradorF.style.height = sizeBorrador + "px";
+      borradorF.style.borderRadius = sizeBorrador/2 + "px";
+      borradorF.style.display = "block";
+    }else if(seleccionAct){
       seleccionado.style.left = e.clientX + "px";
       seleccionado.style.top = e.clientY + "px";
       seleccionado.style.width = 50 + "px";
@@ -89,9 +102,10 @@ export const Canva = () => {
         imgSelec.style.width = `${deltaX}px`;
         imgSelec.style.height = `${deltaY}px`;
       }
-    }
-    if (borrador) {
+    }else if (borrador) {
       ctxRef.current.fillStyle = color_fondo;
+      borradorF.style.left = e.clientX + "px";
+      borradorF.style.top = e.clientY + "px";
       ctxRef.current.clearRect(e.clientX, e.clientY, sizeBorrador, sizeBorrador);
       ctxRef.current.fillRect(e.clientX, e.clientY, sizeBorrador, sizeBorrador);
     } else {
@@ -153,7 +167,11 @@ export const Canva = () => {
   }
 
   const subir=(e)=>{
-    if (isDrawing && figuras) {
+    if(borrador){
+      borrador=false;
+      borradorF.style.display = "none";
+    }
+    else if (isDrawing && figuras) {
       fx = e.clientX;
       fy = e.clientY;
       if (figuraSel === "cuadrado") {
@@ -166,6 +184,19 @@ export const Canva = () => {
         dibujarTriangulo();
       } else if (figuraSel === "linea") {
         dibujarLinea();
+      }else if (figuraSel === "composicion") {
+        if(puntos[0]){
+          ctxRef.current.moveTo(puntos[0], puntos[1]); 
+          ctxRef.current.lineTo(e.clientX, e.clientY);
+          ctxRef.current.stroke();
+        }
+        puntos = [e.clientX, e.clientY];
+        borradorF.style.width = "6px";
+        borradorF.style.height = "6px";
+        borradorF.style.borderRadius = "3px";
+        borradorF.style.left = e.clientX-3 + "px";
+        borradorF.style.top = e.clientY-3 + "px";
+        borradorF.style.display = "block";
       }
     }
     isDrawing = false;
@@ -192,30 +223,44 @@ export const Canva = () => {
   }
 
   const crearFigura = (tipoFigura) => {
+    if(figuraSel === "composicion"){
+      puntos = [];
+    }
     borrador = false;
+    borradorF.style.display = "none";
     escribir = false;
     figuras = true;
     figuraSel = tipoFigura;
     seleccionAct = false;
+    setHabilita(false)
     
   }
 
   const dibujar = () => {
+    puntos = [];
+    borradorF.style.display = "none";
     borrador = false;
     escribir = false;
     figuraSel = undefined;
     seleccionAct = false;
+    setHabilita(false);
   }
 
   const escribe = () => {
+    if(figuras && figuraSel === "composicion"){
+      puntos = [];
+      borradorF.style.display = "none";
+    }
     escribir = true;
     borrador = false;
     figuraSel = undefined;
     seleccionAct = false;
+    setHabilita(false)
   }
 
 
   const aplicarFondo = () => {
+    borradorF.style.display = "none";
     setFondo(color_opcional)
     ctxRef.current.fillStyle = color_opcional;
     ctxRef.current.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
@@ -239,14 +284,19 @@ export const Canva = () => {
 
 
   const limpiar = () => {
+    puntos = [];
+    borradorF.style.display = "none";
     ctxRef.current.fillStyle = color_fondo;
     ctxRef.current.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     ctxRef.current.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     const imagenes = document.querySelectorAll('img');
     imagenes.forEach(imagen => imagen.remove());
+    setHabilita(false)
   }
 
   const restaurar = () => {
+    puntos = [];
+    borradorF.style.display = "none";
     setFondo("white")
     setCurrent("black")
     setRelleno("white")
@@ -254,6 +304,7 @@ export const Canva = () => {
     ctxRef.current.fillStyle = "white";
     ctxRef.current.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     ctxRef.current.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    setHabilita(false)
     const imagenes = document.querySelectorAll('img');
     imagenes.forEach(imagen => imagen.remove());
     ctxRef.current.lineWidth = 1;
@@ -300,6 +351,11 @@ export const Canva = () => {
   }
 
   const subirImg =(e)=>{
+    if(puntos){
+      puntos = [];
+      borradorF.style.display = "none";
+    }
+    setHabilita(false)
     let archivos = document.querySelector(".upload");
     document.querySelector(desplegado).style.display = "none";
     document.querySelector(".desplegar").style.display = "none";
@@ -480,13 +536,13 @@ export const Canva = () => {
                 <label htmlFor="tam">Area de borrado</label>
                 {forma ==="1" &&
                 <input type="range" min="5" max="50" step="5" onChange={(e)=>{setSizeB(e.target.value)}}></input>
-                ||<select onChange={(e)=>{ctxRef.current.lineWidth = e.target.value;}}>
+                ||<select onChange={(e)=>{setSizeB(e.target.value)}}>
                 {tams.map(option => (
                   <option key={option}>{option}</option>
                 ))}
               </select>}
             
-            <button onClick={()=>{borrador = true}}>Borrar</button>
+            <button onClick={()=>{setHabilita(true);}}>Borrar</button>
             <button onClick={()=>{seleccionAct = true;}}>Seleccionar area</button>
             <button onClick={limpiar}>Limpiar</button>
         </div>
@@ -516,6 +572,10 @@ export const Canva = () => {
                 <button value="triangulo" onClick={()=>{crearFigura("triangulo")}}><span className="material-symbols-outlined">
                     change_history
                     </span></button>
+                <button onClick={()=>{
+              crearFigura("composicion");}}><span class="material-symbols-outlined">
+                    shape_line
+                </span></button>
 
                     
                     
@@ -529,42 +589,42 @@ export const Canva = () => {
         </div>
     </div>
       <div className="iconos">
-        <button value=".op1" onClick={()=>{mostrarOpcion(".op1")}}><span className="material-symbols-outlined">
+        <button title="Dibujo libre" value=".op1" onClick={()=>{mostrarOpcion(".op1")}}><span className="material-symbols-outlined">
         edit
         </span></button>
-        <button value=".op2" onClick={()=>{mostrarOpcion(".op2")}}><span className="material-symbols-outlined">
+        <button title="Texto" value=".op2" onClick={()=>{mostrarOpcion(".op2")}}><span className="material-symbols-outlined">
         title
         </span></button>
-        <button value=".op3" onClick={()=>{mostrarOpcion(".op3")}}><span className="material-symbols-outlined">
+        <button title="Fondo" value=".op3" onClick={()=>{mostrarOpcion(".op3")}}><span className="material-symbols-outlined">
             format_color_fill
             </span></button>
-        <button value=".op4" onClick={()=>{mostrarOpcion(".op4")}}><span className="material-symbols-outlined">
+        <button title="Opciones de borrado" value=".op4" onClick={()=>{mostrarOpcion(".op4")}}><span className="material-symbols-outlined">
             delete_forever
             </span></button>
-        <button value=".op5" onClick={()=>{mostrarOpcion(".op5")}}><span className="material-symbols-outlined">
+        <button title="Figuras" value=".op5" onClick={()=>{mostrarOpcion(".op5")}}><span className="material-symbols-outlined">
         interests
         </span></button>
-        <button value=".op6" onClick={()=>{mostrarOpcion(".op6")}}><span className="material-symbols-outlined">
+        <button title="Imágenes" value=".op6" onClick={()=>{mostrarOpcion(".op6")}}><span className="material-symbols-outlined">
             add_photo_alternate
             </span></button>
-            <button onClick={()=>{
+            <button title="Configuración" onClick={()=>{
               document.querySelector(".setting").style.display="block";
             }}><span className="material-symbols-outlined">
                 settings
             </span></button>
-            <button onClick={()=>{
+            <button title="Preguntas" onClick={()=>{
               document.querySelector(".preguntas").style.display="block";
             }}>
                 <span className="material-symbols-outlined">
                     help
                 </span>
             </button>
-            <button onClick={()=>{document.querySelector(".ventana-small").style.display="block";}}>
+            <button title="Autor" onClick={()=>{document.querySelector(".ventana-small").style.display="block";}}>
                 <span className="material-symbols-outlined">
                     person
                     </span>
             </button>
-            <button className="desplegar" onClick={sinOpcion}>
+            <button title="Ocultar selección" className="desplegar" onClick={sinOpcion}>
                 <span className="material-symbols-outlined">
                     arrow_back_ios
                     </span>
@@ -630,6 +690,7 @@ cancel
                 delete_forever
                 </span>
         </div>
+        <div className="borrador"></div>
      
     </>
   )
